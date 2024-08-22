@@ -71,6 +71,8 @@ class QrScanner {
     private _flashOn: boolean = false;
     private _destroyed: boolean = false;
 
+    private static formats: Array<string> = ['qr_code'];
+
     constructor(
         video: HTMLVideoElement,
         onDecode: (result: QrScanner.ScanResult) => void,
@@ -120,9 +122,14 @@ class QrScanner {
         },
         canvasSizeOrCalculateScanRegion?: number | ((video: HTMLVideoElement) => QrScanner.ScanRegion),
         preferredCamera?: QrScanner.FacingMode | QrScanner.DeviceId,
+        formats?: Array<string>,
     ) {
         this.$video = video;
         this.$canvas = document.createElement('canvas');
+
+        if (formats) {
+            QrScanner.formats = formats;
+        }
 
         if (canvasSizeOrOnDecodeErrorOrOptions && typeof canvasSizeOrOnDecodeErrorOrOptions === 'object') {
             // we got an options object using the new api
@@ -263,7 +270,7 @@ class QrScanner {
         document.addEventListener('visibilitychange', this._onVisibilityChange);
         window.addEventListener('resize', this._updateOverlay);
 
-        this._qrEnginePromise = QrScanner.createQrEngine();
+        this._qrEnginePromise = QrScanner.createQrEngine(QrScanner.formats);
     }
 
     async hasFlash(): Promise<boolean> {
@@ -495,7 +502,7 @@ class QrScanner {
                 | SVGImageElement;
             let canvasContext: CanvasRenderingContext2D;
             [qrEngine, image] = await Promise.all([
-                qrEngine || QrScanner.createQrEngine(),
+                qrEngine || QrScanner.createQrEngine(QrScanner.formats),
                 QrScanner._loadImage(imageOrFileOrBlobOrUrl),
             ]);
             [canvas, canvasContext] = QrScanner._drawToCanvas(image, scanRegion, canvas, disallowCanvasResizing);
@@ -616,10 +623,10 @@ class QrScanner {
         QrScanner._postWorkerMessage(this._qrEnginePromise, 'inversionMode', inversionMode);
     }
 
-    static async createQrEngine(): Promise<Worker | BarcodeDetector>;
+    static async createQrEngine(formats: Array<string>): Promise<Worker | BarcodeDetector>;
     /** @deprecated */
-    static async createQrEngine(workerPath: string): Promise<Worker | BarcodeDetector>;
-    static async createQrEngine(workerPath?: string): Promise<Worker | BarcodeDetector> {
+    static async createQrEngine(formats: Array<string>, workerPath: string): Promise<Worker | BarcodeDetector>;
+    static async createQrEngine(formats: Array<string> = ['qr_code'], workerPath?: string): Promise<Worker | BarcodeDetector> {
         if (workerPath) {
             console.warn('Specifying a worker path is not required and not supported anymore.');
         }
@@ -631,7 +638,15 @@ class QrScanner {
         const useBarcodeDetector = !QrScanner._disableBarcodeDetector
             && 'BarcodeDetector' in window
             && BarcodeDetector.getSupportedFormats
-            && (await BarcodeDetector.getSupportedFormats()).includes('qr_code');
+            && (await BarcodeDetector.getSupportedFormats()).some((format) => formats.includes(format));
+
+        if (!useBarcodeDetector) {
+            const unsupportedFormats = formats.filter(async (format) => !(await BarcodeDetector.getSupportedFormats()).includes(format)); 
+            if (unsupportedFormats.length) {
+                console.warn(`The following formats are not supported by the native BarcodeDetector and will be scanned `
+                    + `using the worker: ${unsupportedFormats.join(', ')}`);
+                }
+        }
 
         if (!useBarcodeDetector) return createWorker();
 
@@ -653,7 +668,7 @@ class QrScanner {
                 .catch(() => true);
         if (isChromiumOnMacWithArmVentura) return createWorker();
 
-        return new BarcodeDetector({ formats: ['qr_code'] });
+        return new BarcodeDetector({ formats: formats });
     }
 
     private _onPlay(): void {
@@ -832,7 +847,7 @@ class QrScanner {
 
             if (QrScanner._disableBarcodeDetector && !(await this._qrEnginePromise instanceof Worker)) {
                 // replace the disabled BarcodeDetector
-                this._qrEnginePromise = QrScanner.createQrEngine();
+                this._qrEnginePromise = QrScanner.createQrEngine(QrScanner.formats);
             }
 
             if (result) {

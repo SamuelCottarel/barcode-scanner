@@ -1,4 +1,3 @@
-/// <reference types="offscreencanvas" />
 declare class QrScanner {
     static readonly DEFAULT_CANVAS_SIZE = 400;
     static readonly NO_QR_CODE_FOUND = "No QR code found";
@@ -25,6 +24,7 @@ declare class QrScanner {
     private _paused;
     private _flashOn;
     private _destroyed;
+    private static formats;
     constructor(video: HTMLVideoElement, onDecode: (result: QrScanner.ScanResult) => void, options: {
         onDecodeError?: (error: Error | string) => void;
         calculateScanRegion?: (video: HTMLVideoElement) => QrScanner.ScanRegion;
@@ -65,9 +65,9 @@ declare class QrScanner {
     static scanImage(imageOrFileOrBlobOrUrl: HTMLImageElement | HTMLVideoElement | HTMLCanvasElement | OffscreenCanvas | ImageBitmap | SVGImageElement | File | Blob | URL | String, scanRegion?: QrScanner.ScanRegion | null, qrEngine?: Worker | BarcodeDetector | Promise<Worker | BarcodeDetector> | null, canvas?: HTMLCanvasElement | null, disallowCanvasResizing?: boolean, alsoTryWithoutScanRegion?: boolean): Promise<string>;
     setGrayscaleWeights(red: number, green: number, blue: number, useIntegerApproximation?: boolean): void;
     setInversionMode(inversionMode: QrScanner.InversionMode): void;
-    static createQrEngine(): Promise<Worker | BarcodeDetector>;
+    static createQrEngine(formats: Array<string>): Promise<Worker | BarcodeDetector>;
     /** @deprecated */
-    static createQrEngine(workerPath: string): Promise<Worker | BarcodeDetector>;
+    static createQrEngine(formats: Array<string>, workerPath: string): Promise<Worker | BarcodeDetector>;
     private _onPlay;
     private _onLoadedMetaData;
     private _onVisibilityChange;
