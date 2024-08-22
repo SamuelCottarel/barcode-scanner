@@ -76,6 +76,7 @@ class QrScanner {
     constructor(
         video: HTMLVideoElement,
         onDecode: (result: QrScanner.ScanResult) => void,
+        formats: Array<string>,
         options: {
             onDecodeError?: (error: Error | string) => void,
             calculateScanRegion?: (video: HTMLVideoElement) => QrScanner.ScanRegion,
@@ -92,6 +93,7 @@ class QrScanner {
     constructor(
         video: HTMLVideoElement,
         onDecode: (result: string) => void,
+        formats: Array<string>,
         onDecodeError?: (error: Error | string) => void,
         calculateScanRegion?: (video: HTMLVideoElement) => QrScanner.ScanRegion,
         preferredCamera?: QrScanner.FacingMode | QrScanner.DeviceId,
@@ -100,15 +102,17 @@ class QrScanner {
     constructor(
         video: HTMLVideoElement,
         onDecode: (result: string) => void,
+        formats: Array<string>,
         onDecodeError?: (error: Error | string) => void,
         canvasSize?: number,
         preferredCamera?: QrScanner.FacingMode | QrScanner.DeviceId,
     );
     /** @deprecated */
-    constructor(video: HTMLVideoElement, onDecode: (result: string) => void, canvasSize?: number);
+    constructor(video: HTMLVideoElement, onDecode: (result: string) => void, formats: Array<string>, canvasSize?: number);
     constructor(
         video: HTMLVideoElement,
         onDecode: ((result: QrScanner.ScanResult) => void) | ((result: string) => void),
+        formats: Array<string>,
         canvasSizeOrOnDecodeErrorOrOptions?: number | ((error: Error | string) => void) | {
             onDecodeError?: (error: Error | string) => void,
             calculateScanRegion?: (video: HTMLVideoElement) => QrScanner.ScanRegion,
@@ -122,12 +126,11 @@ class QrScanner {
         },
         canvasSizeOrCalculateScanRegion?: number | ((video: HTMLVideoElement) => QrScanner.ScanRegion),
         preferredCamera?: QrScanner.FacingMode | QrScanner.DeviceId,
-        formats?: Array<string>,
-    ) {
+        ) {
         this.$video = video;
         this.$canvas = document.createElement('canvas');
 
-        if (formats) {
+        if (formats && formats.length > 0) {
             QrScanner.formats = formats;
         }
 

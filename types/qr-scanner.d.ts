@@ -25,7 +25,7 @@ declare class QrScanner {
     private _flashOn;
     private _destroyed;
     private static formats;
-    constructor(video: HTMLVideoElement, onDecode: (result: QrScanner.ScanResult) => void, options: {
+    constructor(video: HTMLVideoElement, onDecode: (result: QrScanner.ScanResult) => void, formats: Array<string>, options: {
         onDecodeError?: (error: Error | string) => void;
         calculateScanRegion?: (video: HTMLVideoElement) => QrScanner.ScanRegion;
         preferredCamera?: QrScanner.FacingMode | QrScanner.DeviceId;
@@ -37,11 +37,11 @@ declare class QrScanner {
         returnDetailedScanResult?: true;
     });
     /** @deprecated */
-    constructor(video: HTMLVideoElement, onDecode: (result: string) => void, onDecodeError?: (error: Error | string) => void, calculateScanRegion?: (video: HTMLVideoElement) => QrScanner.ScanRegion, preferredCamera?: QrScanner.FacingMode | QrScanner.DeviceId);
+    constructor(video: HTMLVideoElement, onDecode: (result: string) => void, formats: Array<string>, onDecodeError?: (error: Error | string) => void, calculateScanRegion?: (video: HTMLVideoElement) => QrScanner.ScanRegion, preferredCamera?: QrScanner.FacingMode | QrScanner.DeviceId);
     /** @deprecated */
-    constructor(video: HTMLVideoElement, onDecode: (result: string) => void, onDecodeError?: (error: Error | string) => void, canvasSize?: number, preferredCamera?: QrScanner.FacingMode | QrScanner.DeviceId);
+    constructor(video: HTMLVideoElement, onDecode: (result: string) => void, formats: Array<string>, onDecodeError?: (error: Error | string) => void, canvasSize?: number, preferredCamera?: QrScanner.FacingMode | QrScanner.DeviceId);
     /** @deprecated */
-    constructor(video: HTMLVideoElement, onDecode: (result: string) => void, canvasSize?: number);
+    constructor(video: HTMLVideoElement, onDecode: (result: string) => void, formats: Array<string>, canvasSize?: number);
     hasFlash(): Promise<boolean>;
     isFlashOn(): boolean;
     toggleFlash(): Promise<void>;

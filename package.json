@@ -1,5 +1,5 @@
 {
-  "name": "barcode-scanner",
+  "name": "barcode-qr-scanner",
   "version": "1.4.3",
   "description": "A javascript QR scanner library",
   "main": "qr-scanner.umd.min.js",
